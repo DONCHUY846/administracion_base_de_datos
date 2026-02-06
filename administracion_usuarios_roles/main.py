@@ -116,6 +116,26 @@ def assign_privileges_to_user(connection, user_name, privileges):
     finally:
         if cursor:
             cursor.close()
+# function to drop a user in PostgreSQL
+def drop_user(connection, user_name):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        
+        query = sql.SQL("DROP USER {name}").format(
+            name=sql.Identifier(user_name)
+        )
+        
+        cursor.execute(query)
+        # connection.commit() 
+        
+        print(f"Usuario '{user_name}' eliminado exitosamente.")
+    except Exception as e:
+        connection.rollback()
+        print(f"Error al eliminar usuario: {e}")
+    finally:
+        if cursor:
+            cursor.close()
 # Main execution
 def main():
     connection = None
