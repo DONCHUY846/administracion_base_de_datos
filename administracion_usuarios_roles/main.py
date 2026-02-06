@@ -95,7 +95,27 @@ def assign_privileges(connection, role_name, privileges, database_name):
     finally:
         if cursor:
             cursor.close()
+# function to assign privileges to a user in PostgreSQL
+def assign_privileges_to_user(connection, user_name, privileges):
+    cursor = None
+    try:
+        cursor = connection.cursor()
         
+        query = sql.SQL("GRANT {privileges} TO {user}").format(
+            privileges=sql.SQL(', ').join(map(sql.SQL, privileges)),
+            user=sql.Identifier(user_name)
+        )
+        
+        cursor.execute(query)
+        # connection.commit() 
+        
+        print(f"Privilegios '{', '.join(privileges)}' asignados al usuario '{user_name}'")
+    except Exception as e:
+        connection.rollback()
+        print(f"Error al asignar privilegios: {e}")
+    finally:
+        if cursor:
+            cursor.close()
 # Main execution
 def main():
     connection = None
