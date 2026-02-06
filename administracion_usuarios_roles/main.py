@@ -73,6 +73,29 @@ def create_role(connection, role_name):
         if cursor:
             cursor.close()
 
+# Function to assign privileges to a role in PostgreSQL
+def assign_privileges(connection, role_name, privileges, database_name):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        
+        query = sql.SQL("GRANT {privileges} ON DATABASE {db} TO {role}").format(
+            privileges=sql.SQL(', ').join(map(sql.SQL, privileges)),
+            db=sql.Identifier(database_name),
+            role=sql.Identifier(role_name)
+        )
+        
+        cursor.execute(query)
+        # connection.commit() 
+        
+        print(f"Privilegios '{', '.join(privileges)}' asignados al rol '{role_name}' en la base de datos '{database_name}'")
+    except Exception as e:
+        connection.rollback()
+        print(f"Error al asignar privilegios: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+        
 # Main execution
 def main():
     connection = None
