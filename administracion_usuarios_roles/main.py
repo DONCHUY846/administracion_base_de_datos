@@ -2,6 +2,7 @@ import psycopg2
 import os
 from psycopg2 import sql
 
+# Function to get the database connection
 def get_connection():
    # returns the database connection
     return psycopg2.connect(
@@ -12,6 +13,7 @@ def get_connection():
         port=os.getenv('PORT')
     )
 
+# Function to show the list of databases
 def show_databases(connection):
     # shows the list of databases
     cursor = None
@@ -30,33 +32,54 @@ def show_databases(connection):
         if cursor:
             cursor.close()
 
-def create_user(connection, role_name, password):
+# Function to create a new user/role in PostgreSQL
+def create_user(connection, user_name, password):
     cursor = None
     try:
         cursor = connection.cursor()
         
         query = sql.SQL("CREATE USER {name} WITH LOGIN PASSWORD %s").format(
-            name=sql.Identifier(role_name)
+            name=sql.Identifier(user_name)
         )
         
         cursor.execute(query, (password,))
         # connection.commit() 
         
-        print(f"Rol '{role_name}' creado exitosamente.")
+        print(f"Usuario '{user_name}' creado exitosamente.")
     except Exception as e:
         connection.rollback()
         print(f"Error al crear rol: {e}")
     finally:
         if cursor:
             cursor.close()
+
+def create_role(connection, role_name):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        
+        query = sql.SQL("CREATE ROLE {name}").format(
+            name=sql.Identifier(role_name),
+        )
+        
+        cursor.execute(query)
+        # connection.commit() 
+        
+        print(f"Rol '{role_name}' creado exitosamente")
+    except Exception as e:
+        connection.rollback()
+        print(f"Error al crear rol: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+
+# Main execution
 def main():
     connection = None
     try:
         connection = get_connection()
         print("Conexión exitosa a PostgreSQL.")
         show_databases(connection)
-        # Example of creating a new role
-        create_user(connection, 'test_user', 'test_password')
     except Exception as e:
         print(f"Error de conexión: {e}")
     finally:
