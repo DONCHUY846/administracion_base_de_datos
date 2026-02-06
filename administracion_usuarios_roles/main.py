@@ -1,17 +1,5 @@
 import psycopg2
-import os
 from psycopg2 import sql
-
-# Function to get the database connection
-def get_connection():
-   # returns the database connection
-    return psycopg2.connect(
-        host=os.getenv('HOST'),
-        user=os.getenv('USER'),
-        password=os.getenv('PASSWORD'),
-        database=os.getenv('DB_NAME'),
-        port=os.getenv('PORT')
-    )
 
 # Function to show the list of databases
 def show_databases(connection):
@@ -21,13 +9,11 @@ def show_databases(connection):
         cursor = connection.cursor()
         cursor.execute("SELECT datname FROM pg_database WHERE datistemplate = false;")
         databases = cursor.fetchall()
-        
-        print("-- Bases de Datos ---")
-        for db in databases:
-            print(f"-> {db[0]}")
+        return [db[0] for db in databases]
             
     except Exception as e:
         print(f"Error al obtener bases de datos: {e}")
+        return []
     finally:
         if cursor:
             cursor.close()
@@ -137,18 +123,6 @@ def drop_user(connection, user_name):
         if cursor:
             cursor.close()
 # Main execution
-def main():
-    connection = None
-    try:
-        connection = get_connection()
-        print("Conexión exitosa a PostgreSQL.")
-        show_databases(connection)
-    except Exception as e:
-        print(f"Error de conexión: {e}")
-    finally:
-        if connection:
-            connection.close()
-            print("Conexión cerrada.")
-
 if __name__ == "__main__":
-    main()
+    import gui
+    gui.main()
